@@ -19,3 +19,249 @@
     cursor: not-allowed;
   }
 }
+
+/*
+ * Scrollbar modern: tipis, membulat, track transparan, menebal saat di-hover.
+ * Chromium/Safari memakai ::-webkit-scrollbar (jangan set `scrollbar-color` untuk mereka — Chrome 121+
+ * akan mengabaikan gaya webkit bila properti standar ada). Firefox memakai properti standar.
+ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgb(148 163 184 / 0.45);
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(100 116 139 / 0.75);
+  border-width: 2px;
+}
+::-webkit-scrollbar-thumb:active {
+  background-color: rgb(71 85 105 / 0.85);
+}
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(148 163 184 / 0.55) transparent;
+  }
+}
+
+/* Daftar Select melayang muncul halus. */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@utility animate-pop {
+  animation: pop-in 140ms ease-out;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/*
+ * Dark mode: `html.dark` (diatur `@client/lib/theme`) menukar variabel palet Tailwind, bukan menambah `dark:`
+ * di setiap kelas. Slate disetel khusus (halaman < kartu < isian < border); warna aksen dibalik (50↔950, 100↔900, …)
+ * sehingga chip bertint jadi gelap dan teks aksen jadi terang. Tombol solid (mis. bg-teal-700 + text-white)
+ * otomatis jadi aksen terang dengan teks gelap — pola "primary container" ala Material 3 dark.
+ * Konsekuensi: overlay gelap pakai `bg-black/…` (black tidak ditukar), bukan `bg-slate-900/…`.
+ * Nilai dibangkitkan dari node_modules/tailwindcss/theme.css; tambah palet di sini bila memakai warna baru.
+ */
+/* ==== Dark mode (dibangkitkan dari palet Tailwind; lihat komentar di atas) ==== */
+:root.dark {
+  color-scheme: dark;
+  --color-white: oklch(20.5% 0.035 263); /* kartu / permukaan */
+  --color-slate-50: oklch(15.5% 0.03 264);
+  --color-slate-100: oklch(25.5% 0.035 262);
+  --color-slate-200: oklch(30% 0.035 261);
+  --color-slate-300: oklch(37.2% 0.044 257.287);
+  --color-slate-400: oklch(55.4% 0.046 257.417);
+  --color-slate-500: oklch(70.4% 0.04 256.788);
+  --color-slate-600: oklch(86.9% 0.022 252.894);
+  --color-slate-700: oklch(92.9% 0.013 255.508);
+  --color-slate-800: oklch(96.8% 0.007 247.896);
+  --color-slate-900: oklch(98.4% 0.003 247.858);
+  --color-slate-950: #fff;
+  --color-teal-50: color-mix(in oklab, oklch(38.6% 0.063 188.416) 45%, transparent);
+  --color-teal-100: color-mix(in oklab, oklch(38.6% 0.063 188.416) 70%, transparent);
+  --color-teal-200: oklch(43.7% 0.078 188.216);
+  --color-teal-300: oklch(51.1% 0.096 186.391);
+  --color-teal-400: oklch(60% 0.118 184.704);
+  --color-teal-500: oklch(70.4% 0.14 182.503);
+  --color-teal-600: oklch(77.7% 0.152 181.912);
+  --color-teal-700: oklch(85.5% 0.138 181.071);
+  --color-teal-800: oklch(91% 0.096 180.426);
+  --color-teal-900: oklch(95.3% 0.051 180.801);
+  --color-teal-950: oklch(98.4% 0.014 180.72);
+  --color-emerald-50: color-mix(in oklab, oklch(37.8% 0.077 168.94) 45%, transparent);
+  --color-emerald-100: color-mix(in oklab, oklch(37.8% 0.077 168.94) 70%, transparent);
+  --color-emerald-200: oklch(43.2% 0.095 166.913);
+  --color-emerald-300: oklch(50.8% 0.118 165.612);
+  --color-emerald-400: oklch(59.6% 0.145 163.225);
+  --color-emerald-500: oklch(69.6% 0.17 162.48);
+  --color-emerald-600: oklch(76.5% 0.177 163.223);
+  --color-emerald-700: oklch(84.5% 0.143 164.978);
+  --color-emerald-800: oklch(90.5% 0.093 164.15);
+  --color-emerald-900: oklch(95% 0.052 163.051);
+  --color-emerald-950: oklch(97.9% 0.021 166.113);
+  --color-rose-50: color-mix(in oklab, oklch(41% 0.159 10.272) 45%, transparent);
+  --color-rose-100: color-mix(in oklab, oklch(41% 0.159 10.272) 70%, transparent);
+  --color-rose-200: oklch(45.5% 0.188 13.697);
+  --color-rose-300: oklch(51.4% 0.222 16.935);
+  --color-rose-400: oklch(58.6% 0.253 17.585);
+  --color-rose-500: oklch(64.5% 0.246 16.439);
+  --color-rose-600: oklch(71.2% 0.194 13.428);
+  --color-rose-700: oklch(81% 0.117 11.638);
+  --color-rose-800: oklch(89.2% 0.058 10.001);
+  --color-rose-900: oklch(94.1% 0.03 12.58);
+  --color-rose-950: oklch(96.9% 0.015 12.422);
+  --color-red-50: color-mix(in oklab, oklch(39.6% 0.141 25.723) 45%, transparent);
+  --color-red-100: color-mix(in oklab, oklch(39.6% 0.141 25.723) 70%, transparent);
+  --color-red-200: oklch(44.4% 0.177 26.899);
+  --color-red-300: oklch(50.5% 0.213 27.518);
+  --color-red-400: oklch(57.7% 0.245 27.325);
+  --color-red-500: oklch(63.7% 0.237 25.331);
+  --color-red-600: oklch(70.4% 0.191 22.216);
+  --color-red-700: oklch(80.8% 0.114 19.571);
+  --color-red-800: oklch(88.5% 0.062 18.334);
+  --color-red-900: oklch(93.6% 0.032 17.717);
+  --color-red-950: oklch(97.1% 0.013 17.38);
+  --color-amber-50: color-mix(in oklab, oklch(41.4% 0.112 45.904) 45%, transparent);
+  --color-amber-100: color-mix(in oklab, oklch(41.4% 0.112 45.904) 70%, transparent);
+  --color-amber-200: oklch(47.3% 0.137 46.201);
+  --color-amber-300: oklch(55.5% 0.163 48.998);
+  --color-amber-400: oklch(66.6% 0.179 58.318);
+  --color-amber-500: oklch(76.9% 0.188 70.08);
+  --color-amber-600: oklch(82.8% 0.189 84.429);
+  --color-amber-700: oklch(87.9% 0.169 91.605);
+  --color-amber-800: oklch(92.4% 0.12 95.746);
+  --color-amber-900: oklch(96.2% 0.059 95.617);
+  --color-amber-950: oklch(98.7% 0.022 95.277);
+  --color-orange-50: color-mix(in oklab, oklch(40.8% 0.123 38.172) 45%, transparent);
+  --color-orange-100: color-mix(in oklab, oklch(40.8% 0.123 38.172) 70%, transparent);
+  --color-orange-200: oklch(47% 0.157 37.304);
+  --color-orange-300: oklch(55.3% 0.195 38.402);
+  --color-orange-400: oklch(64.6% 0.222 41.116);
+  --color-orange-500: oklch(70.5% 0.213 47.604);
+  --color-orange-600: oklch(75% 0.183 55.934);
+  --color-orange-700: oklch(83.7% 0.128 66.29);
+  --color-orange-800: oklch(90.1% 0.076 70.697);
+  --color-orange-900: oklch(95.4% 0.038 75.164);
+  --color-orange-950: oklch(98% 0.016 73.684);
+  --color-sky-50: color-mix(in oklab, oklch(39.1% 0.09 240.876) 45%, transparent);
+  --color-sky-100: color-mix(in oklab, oklch(39.1% 0.09 240.876) 70%, transparent);
+  --color-sky-200: oklch(44.3% 0.11 240.79);
+  --color-sky-300: oklch(50% 0.134 242.749);
+  --color-sky-400: oklch(58.8% 0.158 241.966);
+  --color-sky-500: oklch(68.5% 0.169 237.323);
+  --color-sky-600: oklch(74.6% 0.16 232.661);
+  --color-sky-700: oklch(82.8% 0.111 230.318);
+  --color-sky-800: oklch(90.1% 0.058 230.902);
+  --color-sky-900: oklch(95.1% 0.026 236.824);
+  --color-sky-950: oklch(97.7% 0.013 236.62);
+  --color-blue-50: color-mix(in oklab, oklch(37.9% 0.146 265.522) 45%, transparent);
+  --color-blue-100: color-mix(in oklab, oklch(37.9% 0.146 265.522) 70%, transparent);
+  --color-blue-200: oklch(42.4% 0.199 265.638);
+  --color-blue-300: oklch(48.8% 0.243 264.376);
+  --color-blue-400: oklch(54.6% 0.245 262.881);
+  --color-blue-500: oklch(62.3% 0.214 259.815);
+  --color-blue-600: oklch(70.7% 0.165 254.624);
+  --color-blue-700: oklch(80.9% 0.105 251.813);
+  --color-blue-800: oklch(88.2% 0.059 254.128);
+  --color-blue-900: oklch(93.2% 0.032 255.585);
+  --color-blue-950: oklch(97% 0.014 254.604);
+  --color-indigo-50: color-mix(in oklab, oklch(35.9% 0.144 278.697) 45%, transparent);
+  --color-indigo-100: color-mix(in oklab, oklch(35.9% 0.144 278.697) 70%, transparent);
+  --color-indigo-200: oklch(39.8% 0.195 277.366);
+  --color-indigo-300: oklch(45.7% 0.24 277.023);
+  --color-indigo-400: oklch(51.1% 0.262 276.966);
+  --color-indigo-500: oklch(58.5% 0.233 277.117);
+  --color-indigo-600: oklch(67.3% 0.182 276.935);
+  --color-indigo-700: oklch(78.5% 0.115 274.713);
+  --color-indigo-800: oklch(87% 0.065 274.039);
+  --color-indigo-900: oklch(93% 0.034 272.788);
+  --color-indigo-950: oklch(96.2% 0.018 272.314);
+  --color-violet-50: color-mix(in oklab, oklch(38% 0.189 293.745) 45%, transparent);
+  --color-violet-100: color-mix(in oklab, oklch(38% 0.189 293.745) 70%, transparent);
+  --color-violet-200: oklch(43.2% 0.232 292.759);
+  --color-violet-300: oklch(49.1% 0.27 292.581);
+  --color-violet-400: oklch(54.1% 0.281 293.009);
+  --color-violet-500: oklch(60.6% 0.25 292.717);
+  --color-violet-600: oklch(70.2% 0.183 293.541);
+  --color-violet-700: oklch(81.1% 0.111 293.571);
+  --color-violet-800: oklch(89.4% 0.057 293.283);
+  --color-violet-900: oklch(94.3% 0.029 294.588);
+  --color-violet-950: oklch(96.9% 0.016 293.756);
+  --color-pink-50: color-mix(in oklab, oklch(40.8% 0.153 2.432) 45%, transparent);
+  --color-pink-100: color-mix(in oklab, oklch(40.8% 0.153 2.432) 70%, transparent);
+  --color-pink-200: oklch(45.9% 0.187 3.815);
+  --color-pink-300: oklch(52.5% 0.223 3.958);
+  --color-pink-400: oklch(59.2% 0.249 0.584);
+  --color-pink-500: oklch(65.6% 0.241 354.308);
+  --color-pink-600: oklch(71.8% 0.202 349.761);
+  --color-pink-700: oklch(82.3% 0.12 346.018);
+  --color-pink-800: oklch(89.9% 0.061 343.231);
+  --color-pink-900: oklch(94.8% 0.028 342.258);
+  --color-pink-950: oklch(97.1% 0.014 343.198);
+  --color-yellow-50: color-mix(in oklab, oklch(42.1% 0.095 57.708) 45%, transparent);
+  --color-yellow-100: color-mix(in oklab, oklch(42.1% 0.095 57.708) 70%, transparent);
+  --color-yellow-200: oklch(47.6% 0.114 61.907);
+  --color-yellow-300: oklch(55.4% 0.135 66.442);
+  --color-yellow-400: oklch(68.1% 0.162 75.834);
+  --color-yellow-500: oklch(79.5% 0.184 86.047);
+  --color-yellow-600: oklch(85.2% 0.199 91.936);
+  --color-yellow-700: oklch(90.5% 0.182 98.111);
+  --color-yellow-800: oklch(94.5% 0.129 101.54);
+  --color-yellow-900: oklch(97.3% 0.071 103.193);
+  --color-yellow-950: oklch(98.7% 0.026 102.212);
+  --color-green-50: color-mix(in oklab, oklch(39.3% 0.095 152.535) 45%, transparent);
+  --color-green-100: color-mix(in oklab, oklch(39.3% 0.095 152.535) 70%, transparent);
+  --color-green-200: oklch(44.8% 0.119 151.328);
+  --color-green-300: oklch(52.7% 0.154 150.069);
+  --color-green-400: oklch(62.7% 0.194 149.214);
+  --color-green-500: oklch(72.3% 0.219 149.579);
+  --color-green-600: oklch(79.2% 0.209 151.711);
+  --color-green-700: oklch(87.1% 0.15 154.449);
+  --color-green-800: oklch(92.5% 0.084 155.995);
+  --color-green-900: oklch(96.2% 0.044 156.743);
+  --color-green-950: oklch(98.2% 0.018 155.826);
+}
+
+/* Animasi ganti tema (lihat `switchThemeAnimated`): matikan crossfade bawaan, clip-path diatur dari JS. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+:root[data-theme-transition='shrink']::view-transition-old(root) {
+  z-index: 2;
+}
+:root[data-theme-transition='shrink']::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* Cetak / simpan PDF dari halaman Laporan: A4, warna swatch & grafik tetap tercetak. */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

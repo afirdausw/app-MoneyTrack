@@ -1,4 +1,4 @@
-import { bigint, datetime, mysqlEnum, mysqlTable, text, varchar } from 'drizzle-orm/mysql-core';
+import { bigint, datetime, mysqlEnum, mysqlTable, text, uniqueIndex, varchar } from 'drizzle-orm/mysql-core';
 import { createdAtColumn, defaultNowDatetime } from '@server/db/schema/helpers';
 import { workspaces } from '@server/db/schema/workspaces';
 
@@ -29,7 +29,9 @@ export const projects = mysqlTable('projects', {
   createdAt: createdAtColumn(),
 });
 
-export const invoices = mysqlTable('invoices', {
+export const invoices = mysqlTable(
+  'invoices',
+  {
   id: bigint('id', { mode: 'number', unsigned: true }).autoincrement().primaryKey(),
   workspaceId: bigint('workspace_id', { mode: 'number', unsigned: true })
     .notNull()
@@ -51,4 +53,7 @@ export const invoices = mysqlTable('invoices', {
   dueDate: datetime('due_date', { mode: 'date' }),
   issuedAt: defaultNowDatetime('issued_at'),
   createdAt: createdAtColumn(),
-});
+  },
+  // Nomor invoice unik per Workspace.
+  (table) => [uniqueIndex('uq_invoice_number').on(table.workspaceId, table.invoiceNumber)]
+);

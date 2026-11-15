@@ -3,6 +3,7 @@ import {
   boolean,
   datetime,
   decimal,
+  index,
   int,
   mysqlEnum,
   mysqlTable,
@@ -30,6 +31,9 @@ export const wallets = mysqlTable('wallets', {
     .default('bank'),
   currencyCode: varchar('currency_code', { length: 10 }).notNull().default('IDR'),
   balanceMinor: bigint('balance_minor', { mode: 'number' }).notNull().default(0),
+  /** Kustomisasi tampilan oleh pemilik; NULL = ikon/warna bawaan sesuai jenis. */
+  icon: varchar('icon', { length: 40 }),
+  color: varchar('color', { length: 20 }),
   createdAt: createdAtColumn(),
   updatedAt: updatedAtColumn(),
 });
@@ -90,7 +94,9 @@ export const recurringBills = mysqlTable('recurring_bills', {
   createdAt: createdAtColumn(),
 });
 
-export const transactions = mysqlTable('transactions', {
+export const transactions = mysqlTable(
+  'transactions',
+  {
   id: bigint('id', { mode: 'number', unsigned: true }).autoincrement().primaryKey(),
   workspaceId: bigint('workspace_id', { mode: 'number', unsigned: true })
     .notNull()
@@ -127,7 +133,13 @@ export const transactions = mysqlTable('transactions', {
   ),
   createdAt: createdAtColumn(),
   updatedAt: updatedAtColumn(),
-});
+  },
+  // Laporan profit project & pembayaran invoice.
+  (table) => [
+    index('idx_transactions_project').on(table.projectId),
+    index('idx_transactions_invoice').on(table.invoiceId),
+  ]
+);
 
 export const receipts = mysqlTable('receipts', {
   id: bigint('id', { mode: 'number', unsigned: true }).autoincrement().primaryKey(),

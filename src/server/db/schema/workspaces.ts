@@ -15,6 +15,9 @@ export const workspaces = mysqlTable('workspaces', {
   name: varchar('name', { length: 120 }).notNull(),
   type: mysqlEnum('type', ['personal', 'shared', 'business']).notNull().default('personal'),
   primaryCurrency: varchar('primary_currency', { length: 10 }).notNull().default('IDR'),
+  /** Kustomisasi tampilan; NULL = ikon/warna bawaan sesuai mode. */
+  icon: varchar('icon', { length: 40 }),
+  color: varchar('color', { length: 20 }),
   createdByUserId: bigint('created_by_user_id', { mode: 'number', unsigned: true })
     .notNull()
     .references(() => users.id, { onDelete: 'restrict' }),

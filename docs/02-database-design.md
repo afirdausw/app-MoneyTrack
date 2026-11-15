@@ -41,13 +41,13 @@ erDiagram
 - `sessions`: Sesi login aktif dengan masa berlaku `expires_at`.
 
 ### B. Multi-Workspace & Tata Kelola (`schema/workspaces.ts`)
-- `workspaces`: Ruang keuangan dengan `type` (`personal` | `shared` | `business`) dan `primary_currency`.
+- `workspaces`: Ruang keuangan dengan `type` (`personal` | `shared` | `business`) dan `primary_currency`. Kolom kustomisasi `icon` (kunci ikon, VARCHAR 40) dan `color` (hex `#RRGGBB`, VARCHAR 20) boleh `NULL` = tampilan bawaan sesuai mode.
 - `workspace_members`: Penghubung `users` dan `workspaces` beserta `role` (`owner` | `admin` | `member` | `viewer`).
 - `workspace_invites`: Undangan gabung via token link atau email dengan role awal dan `expires_at`.
 - `audit_logs`: Rekaman aksi (`create`, `update`, `delete`, `settle`) lengkap dengan `actor_user_id` dan `metadata_json`.
 
 ### C. Keuangan Inti & Kolaborasi (`schema/finance.ts`)
-- `wallets`: Dompet/rekening fisik milik user (`cash`, `bank`, `ewallet`, `investment`, `other`), mata uang sendiri (`currency_code`), dan `balance_minor`.
+- `wallets`: Dompet/rekening fisik milik user (`cash`, `bank`, `ewallet`, `investment`, `other`), mata uang sendiri (`currency_code`), dan `balance_minor`. Kolom `icon` & `color` (nullable, diatur pemilik dompet; `NULL` = bawaan sesuai jenis) berlaku di semua Workspace tempat dompet ditautkan.
 - `workspace_wallets`: Relasi many-to-many antara Workspace dan Dompet dengan `visibility_mode`:
   - `workspace_only`: Saldo dompet sinkron, tetapi mutasi hanya tampak di Workspace pembuat transaksi.
   - `full_transparent`: Saldo dan seluruh mutasi dompet terlihat di semua Workspace yang menautkannya.
@@ -76,4 +76,6 @@ Agar skema berjalan lancar di lingkungan Laragon lama (`10.1.25-MariaDB`) maupun
 1. Seluruh kolom waktu otomatis menggunakan `DEFAULT CURRENT_TIMESTAMP` lewat helper [helpers.ts](../src/server/db/schema/helpers.ts) (tidak memakai `DEFAULT (now())`).
 2. Kolom tanggal transaksi/jatuh tempo memakai tipe `DATETIME` untuk menghindari batasan `explicit_defaults_for_timestamp`.
 3. Kolom berindeks unik (`email`, `google_id`) dibatasi maksimal `varchar(191)` agar aman untuk indeks `utf8mb4`.
-4. Eksekusi perubahan database menggunakan **`npm run db:migrate`** (migrasi SQL deterministik), bukan `drizzle-kit push` yang bergantung pada tabel sistem MySQL 8 (`check_constraints`).
+4. **Zona waktu:** Drizzle membaca/menulis DATETIME & TIMESTAMP sebagai UTC, sehingga setiap koneksi menjalankan `SET time_zone = '+00:00'` ([db/index.ts](../src/server/db/index.ts)) agar nilai `DEFAULT CURRENT_TIMESTAMP` juga UTC. Tanggal tanpa jam (jatuh tempo, tenggat, terbit invoice) disimpan sebagai pukul 12:00 lokal lewat `dateKeyToDate`.
+5. Migrasi [0001_clumsy_juggernaut.sql](../drizzle/0001_clumsy_juggernaut.sql) menambah indeks unik nomor invoice per Workspace (`uq_invoice_number`) serta indeks `transactions.project_id` & `invoice_id`.
+6. Eksekusi perubahan database menggunakan **`npm run db:migrate`** (migrasi SQL deterministik), bukan `drizzle-kit push` yang bergantung pada tabel sistem MySQL 8 (`check_constraints`).

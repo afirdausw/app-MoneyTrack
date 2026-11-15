@@ -15,6 +15,14 @@ export function hashSessionToken(rawToken: string): string {
   return crypto.createHash('sha256').update(`${rawToken}:${env.SESSION_SECRET}`).digest('hex');
 }
 
+/** Hash token undangan sebelum disimpan — DB hanya menyimpan hash, bukan token aslinya. */
+export function hashInviteToken(rawToken: string): string {
+  return crypto
+    .createHash('sha256')
+    .update(`invite:${rawToken}:${env.SESSION_SECRET}`)
+    .digest('hex');
+}
+
 function isSecureCookie(): boolean {
   return env.APP_URL.startsWith('https://');
 }

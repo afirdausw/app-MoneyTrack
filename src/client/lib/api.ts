@@ -12,14 +12,29 @@ export class ApiRequestError extends Error {
 }
 
 export async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    ...init,
-    credentials: 'include',
-    headers: {
-      ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
-      ...init?.headers,
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...init,
+      credentials: 'include',
+      headers: {
+        // FormData (upload) dibiarkan agar browser mengisi boundary multipart sendiri.
+        ...(typeof init?.body === 'string' ? { 'Content-Type': 'application/json' } : {}),
+        ...init?.headers,
+      },
+    });
+  } catch {
+    // fetch hanya gagal (reject) bila tidak ada koneksi / server tidak terjangkau.
+    throw new ApiRequestError(
+      'NETWORK_ERROR',
+      navigator.onLine ? 'Tidak dapat terhubung ke server. Coba lagi sebentar.' : 'Kamu sedang offline. Periksa koneksi internet.',
+      0
+    );
+  }
+
+  if (res.status === 429) {
+    throw new ApiRequestError('RATE_LIMITED', 'Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.', 429);
+  }
 
   const json = (await res.json().catch(() => null)) as ApiSuccess<T> | ApiError | null;
 

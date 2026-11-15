@@ -107,7 +107,7 @@ export function AuthScreen({ providers, apiOffline = false }: AuthScreenProps) {
   );
 }
 
-function GoogleBadge() {
+export function GoogleBadge() {
   return (
     <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
       <path

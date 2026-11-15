@@ -3,13 +3,15 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import type { MySql2Database } from 'drizzle-orm/mysql2';
 import { getDb } from '@server/db';
 import type * as schema from '@server/db/schema';
-import type { ApiError, ApiSuccess, AuthUser } from '@shared/types/domain';
+import type { ApiError, ApiSuccess, AuthUser, WorkspaceSummary } from '@shared/types/domain';
 
 export type DbClient = MySql2Database<typeof schema>;
 
 export interface AppEnv {
   Variables: {
     authUser: AuthUser;
+    /** Diisi oleh `requireWorkspaceRole` — Workspace dari param `:wsId` + role user aktif. */
+    workspace: WorkspaceSummary;
   };
 }
 

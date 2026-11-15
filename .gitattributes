@@ -1,2 +1,12 @@
 * text=auto eol=lf
 *.svg text eol=lf
+
+# File biner: jangan pernah diubah line ending-nya.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.xlsx binary

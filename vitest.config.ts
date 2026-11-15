@@ -12,5 +12,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    // File struk dari test ditulis ke folder sementara, bukan ke uploads/ asli.
+    env: { UPLOAD_DIR: './.tmp/test-uploads' },
   },
 });

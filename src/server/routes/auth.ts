@@ -165,6 +165,10 @@ authRoutes.get('/google/callback', async (c) => {
 
     if (byGoogle[0]) {
       userId = byGoogle[0].id;
+      // URL foto profil Google bisa berganti; segarkan tiap login agar avatar tidak kadaluarsa.
+      if (profile.picture && profile.picture !== byGoogle[0].avatarUrl) {
+        await db.update(users).set({ avatarUrl: profile.picture }).where(eq(users.id, userId));
+      }
     } else {
       const byEmail = await db
         .select()
@@ -178,7 +182,7 @@ authRoutes.get('/google/callback', async (c) => {
           .update(users)
           .set({
             googleId: profile.sub,
-            avatarUrl: byEmail[0].avatarUrl ?? profile.picture ?? null,
+            avatarUrl: profile.picture ?? byEmail[0].avatarUrl ?? null,
           })
           .where(eq(users.id, userId));
       } else {

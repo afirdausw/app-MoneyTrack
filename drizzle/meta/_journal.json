@@ -8,6 +8,20 @@
       "when": 1794676802922,
       "tag": "0000_zippy_shooting_star",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1794700452195,
+      "tag": "0001_clumsy_juggernaut",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1794714705801,
+      "tag": "0002_jittery_energizer",
+      "breakpoints": true
     }
   ]
 }

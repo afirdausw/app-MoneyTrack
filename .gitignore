@@ -1,7 +1,30 @@
+# Dependensi & hasil build (dibuat ulang lewat `npm install` / `npm run build`)
 node_modules/
 dist/
+*.tsbuildinfo
+coverage/
+
+# Rahasia & konfigurasi lokal — hanya .env.example yang boleh masuk git
 .env
-.env.local
+.env.*
+!.env.example
+
+# Data pengguna: foto struk privat (lihat UPLOAD_DIR)
 uploads/
-*.log
+
+# Sementara: output test, skrip coba-coba, log
+.tmp/
 scratch/
+/scratch-*
+*.log
+
+# Pengaturan pribadi Claude Code (launch.json tetap dibagikan)
+.claude/settings.local.json
+
+# Editor & sistem operasi
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

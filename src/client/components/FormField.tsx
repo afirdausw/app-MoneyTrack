@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react';
 
+/** Select kustom (pencarian + keyboard) — diekspor ulang di sini agar import lama tetap jalan. */
+export { Select } from '@client/components/Select';
+
 interface FormFieldProps {
   id: string;
   label?: string;

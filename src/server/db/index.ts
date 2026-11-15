@@ -14,6 +14,13 @@ export function getDb(): MySql2Database<typeof schema> | null {
 
   if (!poolInstance) {
     poolInstance = mysql.createPool(env.DATABASE_URL);
+    // Drizzle membaca/menulis DATETIME & TIMESTAMP sebagai UTC. Samakan zona waktu sesi MySQL ke UTC
+    // agar nilai `DEFAULT CURRENT_TIMESTAMP` (created_at, joined_at, dll.) juga UTC — tanpa ini jam
+    // bergeser sebesar offset server (mis. +7 jam di WIB). Kolom TIMESTAMP lama ikut terbaca benar
+    // karena MySQL menyimpannya dalam UTC secara internal.
+    poolInstance.pool.on('connection', (connection) => {
+      connection.query("SET time_zone = '+00:00'");
+    });
     dbInstance = drizzle(poolInstance, { schema, mode: 'default' });
   }
 
