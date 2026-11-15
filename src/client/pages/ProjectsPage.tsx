@@ -1,8 +1,9 @@
-import { Building2, FolderKanban, Loader2, Plus } from 'lucide-react';
+import { Building2, FolderKanban, Plus } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { FormField, Select, getInputClassName } from '@client/components/FormField';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@client/components/Modal';
-import { AmountInput, EmptyState, ErrorBox, PageToolbar, PrimaryButton, ProgressBar, SecondaryButton } from '@client/components/ui';
+import { SegmentThumb } from '@client/components/SegmentThumb';
+import { AmountInput, EmptyState, ErrorBox, PageToolbar, PrimaryButton, ProgressBar, SecondaryButton, LoadingSkeleton } from '@client/components/ui';
 import { ApiRequestError, apiFetch } from '@client/lib/api';
 import { PROJECT_STATUS } from '@client/lib/labels';
 import { useApi } from '@client/lib/useApi';
@@ -53,7 +54,8 @@ export function ProjectsPage({ workspace, dataVersion, onChanged }: ProjectsPage
       </section>
 
       <PageToolbar>
-        <div role="tablist" className="inline-flex rounded-xl bg-slate-100 p-1">
+        <div role="tablist" aria-label="Bisnis" className="relative inline-flex rounded-xl bg-slate-100 p-1">
+          <SegmentThumb />
           {(['projects', 'clients'] as const).map((t) => (
             <button
               key={t}
@@ -61,8 +63,8 @@ export function ProjectsPage({ workspace, dataVersion, onChanged }: ProjectsPage
               role="tab"
               aria-selected={tab === t}
               onClick={() => setTab(t)}
-              className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${
-                tab === t ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
+              className={`relative rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors duration-200 ${
+                tab === t ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               {t === 'projects' ? 'Project' : 'Klien'}
@@ -173,9 +175,7 @@ export function ProjectsPage({ workspace, dataVersion, onChanged }: ProjectsPage
 
 function Loading() {
   return (
-    <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-      <Loader2 className="h-4 w-4 animate-spin" /> Memuat...
-    </div>
+    <LoadingSkeleton label="Memuat..." />
   );
 }
 

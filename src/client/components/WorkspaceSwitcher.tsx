@@ -1,5 +1,6 @@
 import { Plus, Settings2 } from 'lucide-react';
 import { AppearanceBadge, workspaceAppearance } from '@client/lib/appearance';
+import { Tooltip } from '@client/components/Tooltip';
 import { MODE_LABEL, ROLE_LABEL } from '@client/lib/labels';
 import type { WorkspaceSummary } from '@shared/types/domain';
 
@@ -55,15 +56,16 @@ export function WorkspaceSwitcher({
                   {ws.primaryCurrency}
                 </span>
               </button>
-              <button
-                type="button"
-                onClick={() => onManage(ws)}
-                aria-label={`Pengaturan ${ws.name}`}
-                title="Pengaturan & anggota"
-                className="flex w-9 shrink-0 items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-              >
-                <Settings2 className="h-4 w-4" />
-              </button>
+              <Tooltip label="Pengaturan, tampilan & anggota">
+                <button
+                  type="button"
+                  onClick={() => onManage(ws)}
+                  aria-label={`Pengaturan ${ws.name}`}
+                  className="flex w-9 shrink-0 items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                >
+                  <Settings2 className="h-4 w-4" />
+                </button>
+              </Tooltip>
             </div>
           );
         })}

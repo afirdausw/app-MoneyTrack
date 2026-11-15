@@ -220,7 +220,8 @@ export function ModalHeader({ id, title, description, onClose, children }: Modal
           type="button"
           onClick={onClose}
           aria-label="Tutup"
-          className="-mr-1.5 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          // Border transparan selalu ada (ukuran tidak berubah); saat hover/fokus jadi garis lembut lebih gelap dari latarnya.
+          className="-mr-1.5 rounded-lg border border-transparent p-[5px] text-slate-400 transition hover:border-slate-200 hover:bg-slate-100 hover:text-slate-700 focus-visible:border-slate-300 focus-visible:bg-slate-100 focus-visible:text-slate-700 focus-visible:outline-none"
         >
           <X className="h-5 w-5" />
         </button>

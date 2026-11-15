@@ -52,6 +52,21 @@ export function TrendChart({ points, currency }: { points: TrendPoint[]; currenc
   const [tipWidth, setTipWidth] = useState(0);
   const [width, setWidth] = useState(640);
   const [active, setActive] = useState<number | null>(null);
+  /** Bulan terakhir yang ditunjuk: isi tooltip tetap ada selama animasi memudar setelah kursor keluar. */
+  const [last, setLast] = useState<number | null>(null);
+  /** Tooltip sudah tampil → perpindahan antarbulan meluncur; saat baru muncul langsung di tempat. */
+  const [gliding, setGliding] = useState(false);
+  const shown = active ?? last;
+
+  useEffect(() => {
+    if (active === null) {
+      setGliding(false);
+      return undefined;
+    }
+    setLast(active);
+    const timer = window.setTimeout(() => setGliding(true), 30);
+    return () => window.clearTimeout(timer);
+  }, [active]);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -70,15 +85,15 @@ export function TrendChart({ points, currency }: { points: TrendPoint[]; currenc
   const y = (minor: number) => PAD.top + plotH - (fromMinorUnits(minor, currency) / top) * plotH;
   const empty = maxValue === 0;
 
-  const activePoint = active !== null ? points[active] : null;
+  const activePoint = shown !== null ? (points[shown] ?? null) : null;
   // Lebar tooltip mengikuti isi (nominal bisa panjang); posisinya dijepit agar tidak keluar dari area grafik.
   const half = tipWidth / 2;
   const tooltipLeft =
-    active !== null ? Math.min(Math.max(PAD.left + band * (active + 0.5), half + 4), width - half - 4) : 0;
+    shown !== null ? Math.min(Math.max(PAD.left + band * (shown + 0.5), half + 4), width - half - 4) : 0;
 
   useLayoutEffect(() => {
-    if (active !== null && tipRef.current) setTipWidth(tipRef.current.offsetWidth);
-  }, [active]);
+    if (shown !== null && tipRef.current) setTipWidth(tipRef.current.offsetWidth);
+  }, [shown]);
 
   return (
     <figure className="space-y-3">
@@ -120,14 +135,30 @@ export function TrendChart({ points, currency }: { points: TrendPoint[]; currenc
             const groupW = barW * 2 + BAR_GAP;
             return (
               <g key={p.month}>
-                {active === i ? (
-                  <rect x={PAD.left + band * i} y={PAD.top} width={band} height={plotH} style={{ fill: "var(--color-slate-100)" }} />
-                ) : null}
+                {/* Sorotan bulan aktif memudar masuk/keluar. */}
+                <rect
+                  x={PAD.left + band * i}
+                  y={PAD.top}
+                  width={band}
+                  height={plotH}
+                  rx={6}
+                  className="transition-opacity duration-200"
+                  style={{ fill: 'var(--color-slate-100)', opacity: active === i ? 1 : 0 }}
+                />
                 {SERIES.map((s, si) => {
                   const value = p[s.key];
                   const x = cx - groupW / 2 + si * (barW + BAR_GAP);
                   const barTop = y(value);
-                  return <path key={s.key} d={columnPath(x, barTop, barW, PAD.top + plotH - barTop)} fill={s.color} />;
+                  return (
+                    <path
+                      // Skala sumbu ikut di kunci: bila skala berubah, batang tumbuh ulang dari dasar alih-alih melompat.
+                      key={`${s.key}-${top}`}
+                      d={columnPath(x, barTop, barW, PAD.top + plotH - barTop)}
+                      fill={s.color}
+                      className="chart-bar"
+                      style={{ ['--i' as string]: i, opacity: active !== null && active !== i ? 0.4 : 1 }}
+                    />
+                  );
                 })}
                 <text x={cx} y={HEIGHT - 8} textAnchor="middle" className="fill-slate-500 text-[11px]">
                   {monthShort.format(monthDate(p.month))}
@@ -168,8 +199,19 @@ export function TrendChart({ points, currency }: { points: TrendPoint[]; currenc
           <div
             ref={tipRef}
             role="tooltip"
-            className="pointer-events-none absolute top-1 z-10 w-max -translate-x-1/2 rounded-lg bg-slate-900/95 px-3 py-2 text-xs whitespace-nowrap text-slate-300 shadow-lg"
-            style={{ left: tooltipLeft, visibility: tipWidth ? 'visible' : 'hidden' }}
+            aria-hidden={active === null}
+            className={`pointer-events-none absolute top-1 z-10 w-max -translate-x-1/2 rounded-lg bg-slate-900/95 px-3 py-2 text-xs whitespace-nowrap text-slate-300 shadow-lg backdrop-blur-sm ${
+              active !== null ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+            }`}
+            style={{
+              left: tooltipLeft,
+              visibility: tipWidth ? 'visible' : 'hidden',
+              transformOrigin: '50% 0',
+              // Muncul/hilang: memudar + membesar; pindah bulan: meluncur ke kolom berikutnya.
+              transition: `opacity 160ms ease-out, scale 160ms ease-out${
+                gliding ? ', left 260ms cubic-bezier(0.22, 1, 0.36, 1)' : ''
+              }`,
+            }}
           >
             <p className="mb-1.5 font-semibold text-white">{monthLong.format(monthDate(activePoint.month))}</p>
             <div className="grid grid-cols-[auto_auto] gap-x-4 gap-y-0.5">

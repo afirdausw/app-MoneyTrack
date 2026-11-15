@@ -1,6 +1,6 @@
-import { ArrowLeftRight, History, Loader2, Settings2, Split, Target, Users, Wallet } from 'lucide-react';
+import { ArrowLeftRight, History, Settings2, Split, Target, Users, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { EmptyState, ErrorBox } from '@client/components/ui';
+import { EmptyState, ErrorBox, LoadingSkeleton } from '@client/components/ui';
 import { apiFetch } from '@client/lib/api';
 import { formatDayHeading, toDateInput } from '@client/lib/dates';
 import type { AuditLogItem, AuditLogPage as AuditPage, WorkspaceSummary } from '@shared/types/domain';
@@ -115,9 +115,7 @@ export function AuditLogPage({ workspace, dataVersion }: AuditLogPageProps) {
       {error ? <ErrorBox>{error}</ErrorBox> : null}
 
       {loading ? (
-        <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-          <Loader2 className="h-4 w-4 animate-spin" /> Memuat riwayat...
-        </div>
+        <LoadingSkeleton label="Memuat riwayat..." />
       ) : items.length === 0 ? (
         <EmptyState>
           <History className="mx-auto mb-2 h-8 w-8 text-slate-300" />

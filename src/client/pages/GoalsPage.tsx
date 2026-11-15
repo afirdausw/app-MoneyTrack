@@ -1,8 +1,10 @@
-import { CalendarClock, CheckCircle2, Loader2, Plus, Target, Trash2 } from 'lucide-react';
+import { CalendarClock, CheckCircle2, Plus, Target, Trash2 } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
 import { FormField, getInputClassName } from '@client/components/FormField';
+import { DatePicker } from '@client/components/DatePicker';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@client/components/Modal';
-import { AmountInput, EmptyState, ErrorBox, PageToolbar, PrimaryButton, ProgressBar, SecondaryButton } from '@client/components/ui';
+import { SegmentThumb } from '@client/components/SegmentThumb';
+import { AmountInput, EmptyState, ErrorBox, PageToolbar, PrimaryButton, ProgressBar, SecondaryButton, LoadingSkeleton } from '@client/components/ui';
 import { ApiRequestError, apiFetch } from '@client/lib/api';
 import { formatDateKey } from '@client/lib/labels';
 import { useApi } from '@client/lib/useApi';
@@ -47,9 +49,7 @@ export function GoalsPage({ workspace, dataVersion, onChanged }: GoalsPageProps)
       {goals.error ? <ErrorBox>{goals.error}</ErrorBox> : null}
 
       {goals.loading && !goals.data ? (
-        <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-          <Loader2 className="h-4 w-4 animate-spin" /> Memuat target...
-        </div>
+        <LoadingSkeleton label="Memuat target..." variant="cards" />
       ) : list.length === 0 ? (
         <EmptyState>
           <Target className="mx-auto mb-2 h-8 w-8 text-slate-300" />
@@ -240,13 +240,7 @@ function GoalDialog({
         )}
       </div>
       <FormField id="goal-deadline" label="Tenggat (opsional)" hint="Dipakai untuk menghitung setoran per bulan.">
-        <input
-          id="goal-deadline"
-          type="date"
-          value={deadline}
-          onChange={(e) => setDeadline(e.target.value)}
-          className={getInputClassName(false)}
-        />
+        <DatePicker id="goal-deadline" value={deadline} onChange={setDeadline} placeholder="Tanpa tenggat" clearable />
       </FormField>
     </form>
   );
@@ -306,7 +300,8 @@ function GoalDialog({
 
           {canManage ? (
             <form noValidate onSubmit={contribute} className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-              <div role="radiogroup" aria-label="Jenis setoran" className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
+              <div role="radiogroup" aria-label="Jenis setoran" className="relative grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
+                <SegmentThumb />
                 {(['deposit', 'withdraw'] as const).map((option) => (
                   <button
                     key={option}
@@ -314,8 +309,8 @@ function GoalDialog({
                     role="radio"
                     aria-checked={mode === option}
                     onClick={() => setMode(option)}
-                    className={`rounded-lg py-1.5 text-sm font-semibold transition ${
-                      mode === option ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
+                    className={`relative rounded-lg py-1.5 text-sm font-semibold transition-colors duration-200 ${
+                      mode === option ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
                     {option === 'deposit' ? 'Setor' : 'Tarik'}

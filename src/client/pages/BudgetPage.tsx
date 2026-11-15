@@ -1,9 +1,9 @@
-import { AlertTriangle, Copy, Loader2, Pencil } from 'lucide-react';
+import { AlertTriangle, Copy, Pencil } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { FormField } from '@client/components/FormField';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@client/components/Modal';
 import { MonthNav } from '@client/components/MonthNav';
-import { AmountInput, EmptyState, ErrorBox, PrimaryButton, ProgressBar, SecondaryButton } from '@client/components/ui';
+import { AmountInput, EmptyState, ErrorBox, PrimaryButton, ProgressBar, SecondaryButton, LoadingSkeleton } from '@client/components/ui';
 import { ApiRequestError, apiFetch } from '@client/lib/api';
 import { AppearanceBadge, categoryAppearance } from '@client/lib/appearance';
 import { currentMonthKey, formatMonth, shiftMonth } from '@client/lib/dates';
@@ -74,9 +74,7 @@ export function BudgetPage({ workspace, dataVersion, onChanged }: BudgetPageProp
       {budget.error ? <ErrorBox>{budget.error}</ErrorBox> : null}
 
       {!data ? (
-        <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-          <Loader2 className="h-4 w-4 animate-spin" /> Memuat budget...
-        </div>
+        <LoadingSkeleton label="Memuat budget..." />
       ) : (
         <>
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">

@@ -1,3 +1,4 @@
+import { LoadingSkeleton } from '@client/components/ui';
 import { Eye, EyeOff, Link2, Plus, Settings2 } from 'lucide-react';
 import { AppearanceBadge, walletAppearance } from '@client/lib/appearance';
 import { VISIBILITY_LABEL, WALLET_KIND_LABEL } from '@client/lib/labels';
@@ -59,7 +60,7 @@ export function WalletsPage({ workspace, wallets, loading, onCreate, onLink, onM
       </div>
 
       {loading && wallets.length === 0 ? (
-        <p className="py-12 text-center text-sm text-slate-500">Memuat dompet...</p>
+        <LoadingSkeleton label="Memuat dompet..." variant="cards" rows={3} />
       ) : wallets.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-slate-300 bg-white/60 px-4 py-12 text-center text-sm text-slate-500">
           {canManage ? 'Belum ada dompet. Tambahkan rekening, e-wallet, atau kas tunai.' : 'Belum ada dompet di Workspace ini.'}

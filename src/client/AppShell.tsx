@@ -28,6 +28,7 @@ import {
   type TransactionPrefill,
 } from '@client/components/TransactionDialog';
 import { UserAvatar } from '@client/components/UserAvatar';
+import { Tooltip } from '@client/components/Tooltip';
 import { AppearanceBadge, workspaceAppearance } from '@client/lib/appearance';
 import { WalletDialog, type WalletDialogMode } from '@client/components/WalletDialog';
 import { WorkspaceSwitcher } from '@client/components/WorkspaceSwitcher';
@@ -314,15 +315,16 @@ export function AppShell({
               <p className="truncate font-semibold text-slate-900">{user.name}</p>
               <p className="truncate text-slate-500">{user.email}</p>
             </div>
-            <button
-              type="button"
-              onClick={onLogout}
-              title="Keluar"
-              aria-label="Keluar"
-              className="rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+            <Tooltip label="Keluar">
+              <button
+                type="button"
+                onClick={onLogout}
+                aria-label="Keluar"
+                className="rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-50 hover:text-slate-800"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </Tooltip>
           </div>
         </div>
       </aside>
@@ -357,8 +359,9 @@ export function AppShell({
 
             <div className="flex shrink-0 items-center gap-2">
               {health ? (
+                <Tooltip label={health.database === 'connected' ? 'API & database terhubung' : 'Database bermasalah'} side="bottom">
                 <span
-                  title={health.database === 'connected' ? 'API & MySQL terhubung' : 'Database bermasalah'}
+                  tabIndex={0}
                   className={`hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium sm:inline-flex ${
                     health.database === 'connected'
                       ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
@@ -368,6 +371,7 @@ export function AppShell({
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   {health.database === 'connected' ? 'Online' : 'Cek DB'}
                 </span>
+                </Tooltip>
               ) : (
                 <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800">
                   {healthError ?? 'Menghubungkan...'}
@@ -415,6 +419,8 @@ export function AppShell({
             </p>
           ) : null}
 
+          {/* Kunci per halaman & Workspace: ganti halaman → blok-bloknya masuk berurutan (`.page-enter`). */}
+          <div key={`${view}:${workspace.id}`} className="page-enter">
           {view === 'dashboard' ? (
             <DashboardPage
               workspace={workspace}
@@ -513,6 +519,7 @@ export function AppShell({
               {switcher}
             </div>
           )}
+          </div>
         </main>
       </div>
 
@@ -591,11 +598,11 @@ function HeaderIconButton({
   children: ReactNode;
 }) {
   return (
+    <Tooltip label={label} side="bottom">
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
-      title={label}
       aria-pressed={pressed}
       disabled={disabled}
       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition disabled:opacity-60 ${
@@ -606,6 +613,7 @@ function HeaderIconButton({
     >
       {children}
     </button>
+    </Tooltip>
   );
 }
 

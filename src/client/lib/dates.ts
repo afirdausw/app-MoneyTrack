@@ -23,7 +23,7 @@ export function formatMonth(monthKey: string): string {
   return monthFormatter.format(new Date(year, month - 1, 1));
 }
 
-/** `YYYY-MM-DD` lokal untuk `<input type="date">`. */
+/** Date key `YYYY-MM-DD` lokal (nilai `DatePicker`). */
 export function toDateInput(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }

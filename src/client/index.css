@@ -2,6 +2,8 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* Kurva gerak utama (sama dengan animasi ganti tema): cepat di awal, melambat halus di akhir. */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {
@@ -17,6 +19,24 @@
   button:disabled,
   [aria-disabled="true"] {
     cursor: not-allowed;
+  }
+
+  /*
+   * Hover halus di mana pun: elemen interaktif tanpa kelas `transition` tetap berpindah warna dengan lembut.
+   * Kelas `transition*` Tailwind (lapisan utilities) tetap menang bila dipakai.
+   */
+  a[href],
+  button,
+  [role="button"],
+  summary {
+    transition-property: color, background-color, border-color, box-shadow, opacity, scale, translate;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  /* Umpan balik tekan: tombol sedikit mengecil. Elemen selebar penuh (baris daftar, menu) cukup berubah warna. */
+  button:not(:disabled):not([class~="w-full"]):not([role="option"]):active {
+    scale: 0.97;
   }
 }
 
@@ -239,6 +259,152 @@
   --color-green-950: oklch(98.2% 0.018 155.826);
 }
 
+/* ==== Gerak (motion) ====
+ * Satu bahasa gerak untuk seluruh aplikasi, mengikuti modal & ganti tema: masuk dengan ease-out lembut
+ * (--ease-out-soft), keluar lebih cepat. `prefers-reduced-motion` mematikan semuanya (lihat bawah).
+ */
+
+/* Tooltip (components/Tooltip.tsx): muncul membesar dari arah pemicu, keluar memudar. --tip-dy diatur per sisi. */
+@keyframes tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--tip-dy, 4px)) scale(0.94);
+  }
+}
+@keyframes tip-out {
+  to {
+    opacity: 0;
+    transform: translateY(var(--tip-dy, 4px)) scale(0.97);
+  }
+}
+.mt-tooltip[data-state='open'] {
+  animation: tip-in 180ms var(--ease-out-soft) both;
+}
+.mt-tooltip[data-state='closed'] {
+  animation: tip-out 110ms ease-in both;
+}
+
+/* Masuk konten: naik sedikit sambil muncul. Pakai `translate` (bukan transform) agar tidak bentrok dengan kelas transform. */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@utility animate-fade-up {
+  animation: fade-up 320ms var(--ease-out-soft) backwards;
+}
+@utility animate-fade-in {
+  animation: fade-in 220ms ease-out backwards;
+}
+
+/* Ganti halaman (AppShell): blok tingkat atas halaman (anak dari elemen akar halaman) muncul berurutan. */
+.page-enter > * > * {
+  animation: fade-up 380ms var(--ease-out-soft) backwards;
+}
+.page-enter > * > :nth-child(2) { animation-delay: 50ms; }
+.page-enter > * > :nth-child(3) { animation-delay: 100ms; }
+.page-enter > * > :nth-child(4) { animation-delay: 150ms; }
+.page-enter > * > :nth-child(n + 5) { animation-delay: 200ms; }
+
+/*
+ * Kartu yang bisa diklik (tombol/tautan `rounded-2xl` di konten: dompet, target, project, ringkasan) terangkat
+ * sedikit saat di-hover. Hanya di perangkat ber-hover agar tidak "lengket" di layar sentuh.
+ */
+@media (hover: hover) {
+  main :is(button, a[href]).rounded-2xl:not(:disabled) {
+    transition:
+      translate 220ms var(--ease-out-soft),
+      box-shadow 220ms var(--ease-out-soft),
+      border-color 150ms ease-out,
+      background-color 150ms ease-out;
+  }
+  main :is(button, a[href]).rounded-2xl:not(:disabled):hover {
+    translate: 0 -2px;
+    box-shadow: 0 10px 24px -14px rgb(15 23 42 / 0.35);
+  }
+}
+
+/*
+ * Data dimuat (list & kartu): setiap item masuk bertahap. Hanya berjalan saat elemen di-mount, jadi item yang
+ * sudah ada tidak beranimasi ulang ketika daftar diperbarui — hanya item baru / hasil filter baru.
+ */
+main ul > li,
+[role='dialog'] ul > li,
+main section.grid > * {
+  animation: fade-up 340ms var(--ease-out-soft) backwards;
+}
+:is(main ul, [role='dialog'] ul) > li:nth-child(2), main section.grid > :nth-child(2) { animation-delay: 30ms; }
+:is(main ul, [role='dialog'] ul) > li:nth-child(3), main section.grid > :nth-child(3) { animation-delay: 60ms; }
+:is(main ul, [role='dialog'] ul) > li:nth-child(4), main section.grid > :nth-child(4) { animation-delay: 90ms; }
+:is(main ul, [role='dialog'] ul) > li:nth-child(5), main section.grid > :nth-child(5) { animation-delay: 120ms; }
+:is(main ul, [role='dialog'] ul) > li:nth-child(6), main section.grid > :nth-child(6) { animation-delay: 150ms; }
+:is(main ul, [role='dialog'] ul) > li:nth-child(7) { animation-delay: 180ms; }
+:is(main ul, [role='dialog'] ul) > li:nth-child(8) { animation-delay: 210ms; }
+:is(main ul, [role='dialog'] ul) > li:nth-child(9) { animation-delay: 240ms; }
+:is(main ul, [role='dialog'] ul) > li:nth-child(n + 10) { animation-delay: 270ms; }
+
+/* Skeleton saat memuat: kilau bergerak pelan, warna palet sehingga ikut dark mode. */
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+.skeleton {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-slate-100) 0%,
+    var(--color-slate-200) 20%,
+    var(--color-slate-100) 40%,
+    var(--color-slate-100) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Grafik (components/TrendChart.tsx): batang tumbuh dari garis dasar, berurutan per bulan. */
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+.chart-bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: bar-grow 700ms var(--ease-out-soft) backwards;
+  animation-delay: calc(var(--i, 0) * 40ms);
+  transition: opacity 200ms ease-out;
+}
+
+/* Segmented control / tab (components/SegmentThumb.tsx): latar aktif meluncur ke pilihan baru. */
+.segment-thumb {
+  transition:
+    transform 320ms var(--ease-out-soft),
+    width 320ms var(--ease-out-soft),
+    height 320ms var(--ease-out-soft),
+    background-color 200ms ease-out,
+    opacity 150ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Animasi ganti tema (lihat `switchThemeAnimated`): matikan crossfade bawaan, clip-path diatur dari JS. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -264,4 +430,132 @@
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+}
+
+/* ==== Air Datepicker (components/DatePicker.tsx): disamakan dengan gaya aplikasi; variabel palet ikut dark mode ==== */
+.air-datepicker.mt-datepicker {
+  --adp-font-family: var(--font-sans);
+  --adp-font-size: 14px;
+  --adp-width: 280px;
+  --adp-padding: 8px;
+  --adp-z-index: 70;
+  --adp-transition-duration: 0.18s;
+  --adp-transition-offset: 6px;
+  --adp-background-color: var(--color-white);
+  --adp-background-color-hover: var(--color-slate-100);
+  --adp-background-color-active: var(--color-slate-200);
+  --adp-color: var(--color-slate-800);
+  --adp-color-secondary: var(--color-slate-500);
+  --adp-accent-color: var(--color-teal-600);
+  --adp-color-current-date: var(--color-teal-700);
+  --adp-color-other-month: var(--color-slate-300);
+  --adp-color-other-month-hover: var(--color-slate-400);
+  --adp-color-disabled: var(--color-slate-300);
+  --adp-border-color: var(--color-slate-200);
+  --adp-border-color-inner: var(--color-slate-100);
+  --adp-border-radius: 16px;
+  --adp-nav-height: 40px;
+  --adp-nav-action-size: 34px;
+  --adp-nav-arrow-color: var(--color-slate-500);
+  --adp-nav-color-secondary: var(--color-slate-500);
+  --adp-day-name-color: var(--color-slate-400);
+  --adp-day-name-color-hover: var(--color-teal-600);
+  --adp-day-cell-height: 36px;
+  --adp-month-cell-height: 44px;
+  --adp-year-cell-height: 52px;
+  --adp-cell-border-radius: 10px;
+  --adp-cell-background-color-hover: var(--color-slate-100);
+  --adp-cell-background-color-selected: var(--color-teal-600);
+  --adp-cell-background-color-selected-hover: var(--color-teal-700);
+  --adp-background-color-selected-other-month: var(--color-teal-500);
+  --adp-background-color-selected-other-month-focused: var(--color-teal-600);
+  --adp-btn-height: 36px;
+  --adp-btn-border-radius: 10px;
+  --adp-btn-color: var(--color-teal-700);
+  --adp-btn-color-hover: var(--color-teal-800);
+  --adp-btn-background-color-hover: var(--color-teal-50);
+  --adp-btn-background-color-active: var(--color-teal-100);
+  --adp-mobile-width: min(340px, calc(100vw - 32px));
+  --adp-mobile-font-size: 15px;
+  --adp-mobile-day-cell-height: 42px;
+  border-color: var(--adp-border-color);
+  box-shadow:
+    0 20px 25px -5px rgb(15 23 42 / 0.12),
+    0 8px 10px -6px rgb(15 23 42 / 0.08);
+}
+.air-datepicker.mt-datepicker.-is-mobile- {
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.35);
+}
+.air-datepicker-overlay {
+  --adp-overlay-background-color: rgb(0 0 0 / 0.5);
+  --adp-overlay-z-index: 69;
+  --adp-overlay-transition-duration: 0.2s;
+}
+.mt-datepicker .air-datepicker--pointer {
+  display: none;
+}
+.mt-datepicker .air-datepicker-nav {
+  padding: 8px 8px 2px;
+  border-bottom: 0;
+}
+.mt-datepicker .air-datepicker-nav--title {
+  border-radius: 10px;
+  padding: 0 10px;
+  font-size: 14px;
+  color: var(--color-slate-500);
+}
+.mt-datepicker .air-datepicker-nav--title strong {
+  margin-right: 4px;
+  font-weight: 600;
+  color: var(--color-slate-900);
+}
+.mt-datepicker .air-datepicker-nav--action {
+  border-radius: 10px;
+}
+.mt-datepicker .air-datepicker-nav--action svg {
+  width: 18px;
+  height: 18px;
+}
+.mt-datepicker .air-datepicker-body--day-name {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.mt-datepicker .air-datepicker-cell {
+  font-weight: 500;
+  transition: background-color 0.12s, color 0.12s;
+}
+.mt-datepicker .air-datepicker-cell.-current- {
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--color-teal-600);
+}
+.mt-datepicker .air-datepicker-cell.-selected-,
+.mt-datepicker .air-datepicker-cell.-selected-.-current- {
+  color: #fff;
+  font-weight: 600;
+  box-shadow: none;
+}
+.mt-datepicker .air-datepicker-cell.-disabled- {
+  cursor: not-allowed;
+}
+.mt-datepicker .air-datepicker--buttons {
+  padding: 6px 8px 8px;
+}
+.mt-datepicker .air-datepicker-buttons {
+  gap: 6px;
+}
+.mt-datepicker .air-datepicker-button {
+  font-size: 13px;
+  font-weight: 600;
+}
+.mt-datepicker .air-datepicker-button.adp-btn-clear {
+  color: var(--color-slate-500);
+}
+.mt-datepicker .air-datepicker-button.adp-btn-clear:hover {
+  color: var(--color-rose-600);
+  background: var(--color-rose-50);
+}
+.mt-datepicker.mt-datepicker-enter {
+  animation: pop-in 0.16s ease-out;
 }

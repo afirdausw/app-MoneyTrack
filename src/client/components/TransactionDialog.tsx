@@ -1,12 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BellRing, Camera, ExternalLink, Loader2, Pencil, Trash2, X } from 'lucide-react';
 import { type FocusEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { FormField, Select, getInputClassName } from '@client/components/FormField';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@client/components/Modal';
 import { TransactionDetailView } from '@client/components/TransactionDetailView';
-import { AmountInput, RateInput } from '@client/components/ui';
+import { SegmentThumb } from '@client/components/SegmentThumb';
+import { DatePicker } from '@client/components/DatePicker';
+import { Tooltip } from '@client/components/Tooltip';
+import { AmountInput, RateInput, LoadingSkeleton } from '@client/components/ui';
 import { ApiRequestError, apiFetch } from '@client/lib/api';
 import { dateInputToIso, toDateInput } from '@client/lib/dates';
 import { compressImage, formatBytes } from '@client/lib/image';
@@ -158,6 +161,7 @@ export function TransactionDialog({
 
   const {
     register,
+    control,
     handleSubmit,
     watch,
     setValue,
@@ -452,9 +456,7 @@ export function TransactionDialog({
 
       <ModalBody>
         {loadingDetail ? (
-          <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-            <Loader2 className="h-4 w-4 animate-spin" /> Memuat transaksi...
-          </div>
+          <LoadingSkeleton label="Memuat transaksi..." variant="detail" />
         ) : viewing ? (
           detail ? (
             <div className="space-y-4">
@@ -488,15 +490,12 @@ export function TransactionDialog({
               </div>
             ) : null}
             <fieldset disabled={readOnly || busy} className="space-y-5">
-              <div role="radiogroup" aria-label="Jenis transaksi" className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1">
+              <div role="radiogroup" aria-label="Jenis transaksi" className="relative grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1">
+                <SegmentThumb />
                 {(['expense', 'income', 'transfer'] as const).map((option) => {
                   const active = type === option;
                   const activeClass =
-                    option === 'expense'
-                      ? 'bg-white text-rose-700 shadow-xs'
-                      : option === 'income'
-                        ? 'bg-white text-emerald-700 shadow-xs'
-                        : 'bg-white text-slate-900 shadow-xs';
+                    option === 'expense' ? 'text-rose-700' : option === 'income' ? 'text-emerald-700' : 'text-slate-900';
                   return (
                     <button
                       key={option}
@@ -504,7 +503,7 @@ export function TransactionDialog({
                       role="radio"
                       aria-checked={active}
                       onClick={() => changeType(option)}
-                      className={`rounded-lg px-2 py-2 text-sm font-semibold transition ${
+                      className={`relative rounded-lg px-2 py-2 text-sm font-semibold transition-colors duration-200 ${
                         active ? activeClass : 'text-slate-500 hover:text-slate-800'
                       }`}
                     >
@@ -657,12 +656,19 @@ export function TransactionDialog({
                   />
                 </FormField>
                 <FormField id="tx-date" label="Tanggal" required error={errors.date?.message}>
-                  <input
-                    id="tx-date"
-                    type="date"
-                    max={toDateInput(new Date(Date.now() + 365 * 86_400_000))}
-                    className={getInputClassName(Boolean(errors.date))}
-                    {...register('date')}
+                  <Controller
+                    control={control}
+                    name="date"
+                    render={({ field }) => (
+                      <DatePicker
+                        id="tx-date"
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        max={toDateInput(new Date(Date.now() + 365 * 86_400_000))}
+                        invalid={Boolean(errors.date)}
+                      />
+                    )}
                   />
                 </FormField>
               </div>
@@ -780,12 +786,14 @@ export function TransactionDialog({
 function ReceiptThumb({ src, caption, onRemove }: { src: string; caption: string; onRemove?: () => void }) {
   return (
     <figure className="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-      <a href={src} target="_blank" rel="noreferrer" className="block aspect-square" title="Buka foto">
-        <img src={src} alt="Foto struk" loading="lazy" className="h-full w-full object-cover" />
-        <span className="absolute top-1.5 left-1.5 hidden rounded-md bg-black/50 p-1 text-white group-hover:block">
-          <ExternalLink className="h-3 w-3" />
-        </span>
-      </a>
+      <Tooltip label="Buka foto di tab baru">
+        <a href={src} target="_blank" rel="noreferrer" className="block aspect-square">
+          <img src={src} alt="Foto struk" loading="lazy" className="h-full w-full object-cover" />
+          <span className="absolute top-1.5 left-1.5 hidden rounded-md bg-black/50 p-1 text-white group-hover:block">
+            <ExternalLink className="h-3 w-3" />
+          </span>
+        </a>
+      </Tooltip>
       <figcaption className="truncate px-1.5 py-1 text-[10px] text-slate-500">{caption}</figcaption>
       {onRemove ? (
         <button

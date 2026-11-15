@@ -1,9 +1,9 @@
-import { Loader2, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FormField, Select } from '@client/components/FormField';
 import { MonthNav } from '@client/components/MonthNav';
 import { TransactionList } from '@client/components/TransactionList';
-import { AmountInput } from '@client/components/ui';
+import { AmountInput, LoadingSkeleton } from '@client/components/ui';
 import { apiFetch } from '@client/lib/api';
 import { currentMonthKey, formatMonth, monthRangeIso } from '@client/lib/dates';
 import { TRANSACTION_TYPE_LABEL } from '@client/lib/labels';
@@ -236,9 +236,7 @@ export function TransactionsPage({ workspace, wallets, categories, dataVersion, 
       ) : null}
 
       {loading ? (
-        <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-          <Loader2 className="h-4 w-4 animate-spin" /> Memuat transaksi...
-        </div>
+        <LoadingSkeleton label="Memuat transaksi..." />
       ) : items.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-slate-300 bg-white/60 px-4 py-12 text-center text-sm text-slate-500">
           {anyFilter

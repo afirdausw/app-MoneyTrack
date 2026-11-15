@@ -92,7 +92,6 @@ export function AppearancePicker({
               role="radio"
               aria-checked={active}
               aria-label={`Ikon ${key}`}
-              title={key}
               onClick={() => onChange({ ...value, icon: key })}
               className={`flex aspect-square items-center justify-center rounded-lg border transition ${
                 active ? 'border-transparent text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50'

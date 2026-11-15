@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { AppearancePicker } from '@client/components/AppearancePicker';
 import { FormField, Select, getInputClassName } from '@client/components/FormField';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@client/components/Modal';
+import { SegmentThumb } from '@client/components/SegmentThumb';
 import { WorkspaceMembersPanel } from '@client/components/WorkspaceMembersPanel';
 import { ApiRequestError, apiFetch } from '@client/lib/api';
 import { WORKSPACE_DEFAULT_APPEARANCE } from '@client/lib/appearance';
@@ -161,8 +162,9 @@ export function WorkspaceDialog({
           <div
             role="tablist"
             aria-label="Pengaturan Workspace"
-            className="mb-4 grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1"
+            className="relative mb-4 grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1"
           >
+            <SegmentThumb />
             <TabButton active={tab === 'general'} onClick={() => setTab('general')} icon={Settings2}>
               Umum
             </TabButton>
@@ -178,7 +180,7 @@ export function WorkspaceDialog({
 
       <ModalBody>
         {/* Kedua tab tetap ter-mount agar isian form & link undangan tidak hilang saat berpindah tab. */}
-        <div hidden={tab !== 'general'} className="space-y-6">
+        <div hidden={tab !== 'general'} className="animate-fade-up space-y-6">
           <form id={FORM_ID} noValidate onSubmit={handleSubmit(onSubmit, () => setTab('general'))} className="space-y-5">
             <fieldset disabled={readOnly} className="space-y-5">
             <FormField id="ws-name" label="Nama Workspace" required error={errors.name?.message}>
@@ -302,7 +304,7 @@ export function WorkspaceDialog({
         </div>
 
         {editing ? (
-          <div hidden={tab !== 'appearance'} className="space-y-3">
+          <div hidden={tab !== 'appearance'} className="animate-fade-up space-y-3">
             <p className="text-sm text-slate-500">
               Ikon & warna membantu membedakan Workspace di daftar dan di bagian atas layar. Berlaku untuk semua anggota.
             </p>
@@ -311,7 +313,7 @@ export function WorkspaceDialog({
         ) : null}
 
         {editing ? (
-          <div hidden={tab !== 'members'}>
+          <div hidden={tab !== 'members'} className="animate-fade-up">
             <WorkspaceMembersPanel workspace={editing} currentUserId={currentUserId} onLeft={onLeft} />
           </div>
         ) : null}
@@ -365,11 +367,11 @@ function TabButton({ active, onClick, icon: Icon, children }: TabButtonProps) {
       aria-selected={active}
       onClick={onClick}
       // Segmented control, seragam dengan pilihan jenis di dialog Catat Transaksi.
-      className={`flex min-w-0 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-semibold transition ${
-        active ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+      className={`relative flex min-w-0 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-semibold transition-colors duration-200 ${
+        active ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
       }`}
     >
-      <Icon className={`h-4 w-4 shrink-0 ${active ? 'text-teal-700' : ''}`} />
+      <Icon className={`h-4 w-4 shrink-0 transition-colors duration-200 ${active ? 'text-teal-700' : ''}`} />
       <span className="truncate">{children}</span>
     </button>
   );

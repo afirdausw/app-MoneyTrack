@@ -1,8 +1,9 @@
-import { FileText, Loader2, Plus } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { FormField, Select, getInputClassName } from '@client/components/FormField';
+import { DatePicker } from '@client/components/DatePicker';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@client/components/Modal';
-import { AmountInput, EmptyState, ErrorBox, PageToolbar, PrimaryButton, ProgressBar, SecondaryButton } from '@client/components/ui';
+import { AmountInput, EmptyState, ErrorBox, PageToolbar, PrimaryButton, ProgressBar, SecondaryButton, LoadingSkeleton } from '@client/components/ui';
 import { ApiRequestError, apiFetch } from '@client/lib/api';
 import { INVOICE_STATUS, formatDateKey } from '@client/lib/labels';
 import { useApi } from '@client/lib/useApi';
@@ -102,9 +103,7 @@ export function InvoicesPage({ workspace, dataVersion, onRecordPayment, onChange
       {invoices.error ? <ErrorBox>{invoices.error}</ErrorBox> : null}
 
       {invoices.loading && !invoices.data ? (
-        <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-          <Loader2 className="h-4 w-4 animate-spin" /> Memuat invoice...
-        </div>
+        <LoadingSkeleton label="Memuat invoice..." />
       ) : visible.length === 0 ? (
         <EmptyState>
           <FileText className="mx-auto mb-2 h-8 w-8 text-slate-300" />
@@ -322,10 +321,10 @@ function InvoiceDialog({
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <FormField id="inv-issued" label="Tanggal terbit" required>
-              <input id="inv-issued" type="date" value={issuedAt} onChange={(e) => setIssuedAt(e.target.value)} className={getInputClassName(false)} />
+              <DatePicker id="inv-issued" value={issuedAt} onChange={setIssuedAt} />
             </FormField>
             <FormField id="inv-due" label="Jatuh tempo">
-              <input id="inv-due" type="date" value={dueDate} min={issuedAt} onChange={(e) => setDueDate(e.target.value)} className={getInputClassName(false)} />
+              <DatePicker id="inv-due" value={dueDate} min={issuedAt} onChange={setDueDate} placeholder="Tanpa jatuh tempo" clearable />
             </FormField>
           </div>
           <label className="flex items-center gap-2.5 text-sm text-slate-700">

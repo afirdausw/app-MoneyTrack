@@ -175,3 +175,89 @@ export function SecondaryButton({ children, onClick, disabled, type = 'button' }
 export function PageToolbar({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">{children}</div>;
 }
+
+/**
+ * Kerangka konten saat data dimuat: bentuknya meniru isi (baris daftar / kartu / laporan) dengan kilau bergerak
+ * (`.skeleton` di index.css), lalu isi asli masuk dengan animasi bertahap. Label tetap terbaca screen reader.
+ */
+export function LoadingSkeleton({
+  label,
+  variant = 'list',
+  rows = 4,
+}: {
+  label: string;
+  variant?: 'list' | 'cards' | 'report' | 'detail';
+  rows?: number;
+}) {
+  const sr = <span className="sr-only">{label}</span>;
+  if (variant === 'cards') {
+    return (
+      <div role="status" className="grid animate-fade-in gap-3 sm:grid-cols-2">
+        {sr}
+        {Array.from({ length: rows }, (_, i) => (
+          <div key={i} className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center gap-3">
+              <div className="skeleton h-10 w-10 rounded-xl" />
+              <div className="flex-1 space-y-2">
+                <div className="skeleton h-3.5 w-1/2 rounded-full" />
+                <div className="skeleton h-3 w-1/3 rounded-full" />
+              </div>
+            </div>
+            <div className="skeleton h-2 w-full rounded-full" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (variant === 'report') {
+    return (
+      <div role="status" className="animate-fade-in space-y-4">
+        {sr}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="skeleton h-3 w-2/3 rounded-full" />
+              <div className="skeleton h-5 w-3/4 rounded-full" />
+            </div>
+          ))}
+        </div>
+        <div className="skeleton h-72 rounded-2xl" />
+      </div>
+    );
+  }
+  if (variant === 'detail') {
+    return (
+      <div role="status" className="animate-fade-in space-y-5 py-2">
+        {sr}
+        <div className="flex flex-col items-center gap-3">
+          <div className="skeleton h-14 w-14 rounded-2xl" />
+          <div className="skeleton h-3.5 w-32 rounded-full" />
+          <div className="skeleton h-7 w-44 rounded-full" />
+        </div>
+        <div className="space-y-3">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="flex justify-between gap-4">
+              <div className="skeleton h-3 w-20 rounded-full" />
+              <div className="skeleton h-3 w-32 rounded-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div role="status" className="animate-fade-in divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      {sr}
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="flex items-center gap-3 px-4 py-3.5" style={{ opacity: 1 - i * 0.15 }}>
+          <div className="skeleton h-9 w-9 shrink-0 rounded-xl" />
+          <div className="flex-1 space-y-2">
+            <div className="skeleton h-3.5 rounded-full" style={{ width: `${55 - (i % 3) * 12}%` }} />
+            <div className="skeleton h-3 w-1/4 rounded-full" />
+          </div>
+          <div className="skeleton h-3.5 w-20 rounded-full" />
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -1,8 +1,10 @@
-import { BellRing, Loader2, Plus, Repeat } from 'lucide-react';
+import { BellRing, Plus, Repeat } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { FormField, Select, getInputClassName } from '@client/components/FormField';
+import { DatePicker } from '@client/components/DatePicker';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@client/components/Modal';
-import { AmountInput, EmptyState, ErrorBox, PageToolbar, PrimaryButton, SecondaryButton } from '@client/components/ui';
+import { SegmentThumb } from '@client/components/SegmentThumb';
+import { AmountInput, EmptyState, ErrorBox, PageToolbar, PrimaryButton, SecondaryButton, LoadingSkeleton } from '@client/components/ui';
 import { ApiRequestError, apiFetch } from '@client/lib/api';
 import { FREQUENCY_LABEL, TRANSACTION_TYPE_LABEL, dueLabel } from '@client/lib/labels';
 import { useApi } from '@client/lib/useApi';
@@ -80,9 +82,7 @@ export function RecurringPage({ workspace, wallets, categories, dataVersion, onP
       {bills.error ? <ErrorBox>{bills.error}</ErrorBox> : null}
 
       {bills.loading && !bills.data ? (
-        <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-          <Loader2 className="h-4 w-4 animate-spin" /> Memuat tagihan...
-        </div>
+        <LoadingSkeleton label="Memuat tagihan..." />
       ) : list.length === 0 ? (
         <EmptyState>
           <Repeat className="mx-auto mb-2 h-8 w-8 text-slate-300" />
@@ -260,7 +260,8 @@ function RecurringDialog({
       />
       <ModalBody>
         <form id="recurring-form" noValidate onSubmit={submit} className="space-y-4">
-          <div role="radiogroup" aria-label="Jenis" className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
+          <div role="radiogroup" aria-label="Jenis" className="relative grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
+                <SegmentThumb />
             {(['expense', 'income'] as const).map((option) => (
               <button
                 key={option}
@@ -271,8 +272,8 @@ function RecurringDialog({
                   setType(option);
                   setCategoryId('');
                 }}
-                className={`rounded-lg py-1.5 text-sm font-semibold transition ${
-                  type === option ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
+                className={`relative rounded-lg py-1.5 text-sm font-semibold transition-colors duration-200 ${
+                  type === option ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 {TRANSACTION_TYPE_LABEL[option]}
@@ -327,13 +328,7 @@ function RecurringDialog({
               </Select>
             </FormField>
             <FormField id="rec-due" label="Jatuh tempo berikutnya" required>
-              <input
-                id="rec-due"
-                type="date"
-                value={nextDueDate}
-                onChange={(e) => setNextDueDate(e.target.value)}
-                className={getInputClassName(false)}
-              />
+              <DatePicker id="rec-due" value={nextDueDate} onChange={setNextDueDate} />
             </FormField>
           </div>
 

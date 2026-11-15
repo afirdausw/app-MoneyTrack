@@ -3,6 +3,7 @@ import { Check, Copy, Link2, LogOut, Mail, UserMinus, UserPlus, X } from 'lucide
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FormField, Select, getInputClassName } from '@client/components/FormField';
+import { Tooltip } from '@client/components/Tooltip';
 import { ROLE_LABEL } from '@client/lib/labels';
 import { ApiRequestError, apiFetch } from '@client/lib/api';
 import type {
@@ -208,15 +209,16 @@ export function WorkspaceMembersPanel({ workspace, currentUserId, onLeft }: Work
                         Keluarkan
                       </button>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => setConfirmRemove(member.userId)}
-                        aria-label={`Keluarkan ${member.name}`}
-                        title="Keluarkan dari Workspace"
-                        className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
-                      >
-                        <UserMinus className="h-4 w-4" />
-                      </button>
+                      <Tooltip label="Keluarkan dari Workspace">
+                        <button
+                          type="button"
+                          onClick={() => setConfirmRemove(member.userId)}
+                          aria-label={`Keluarkan ${member.name}`}
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                        >
+                          <UserMinus className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
                     )}
                   </span>
                 ) : (
@@ -343,15 +345,16 @@ export function WorkspaceMembersPanel({ workspace, currentUserId, onLeft }: Work
                     {dateFormatter.format(new Date(invite.expiresAt))}
                   </span>
                 </span>
-                <button
-                  type="button"
-                  onClick={() => revoke(invite.id)}
-                  aria-label="Batalkan undangan"
-                  title="Batalkan undangan"
-                  className="shrink-0 rounded-lg p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+                <Tooltip label="Batalkan undangan">
+                  <button
+                    type="button"
+                    onClick={() => revoke(invite.id)}
+                    aria-label="Batalkan undangan"
+                    className="shrink-0 rounded-lg p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </Tooltip>
               </li>
             ))}
           </ul>

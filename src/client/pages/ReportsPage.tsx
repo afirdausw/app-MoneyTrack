@@ -1,9 +1,11 @@
-import { BarChart3, FileSpreadsheet, FileText, Loader2, Printer, Table2 } from 'lucide-react';
+import { BarChart3, FileSpreadsheet, FileText, Printer, Table2 } from 'lucide-react';
 import { useState } from 'react';
-import { getInputClassName } from '@client/components/FormField';
+import { AutoHeight } from '@client/components/AutoHeight';
 import { TrendChart } from '@client/components/TrendChart';
+import { SegmentThumb } from '@client/components/SegmentThumb';
+import { DatePicker } from '@client/components/DatePicker';
 import { AppearanceBadge, categoryAppearance } from '@client/lib/appearance';
-import { ErrorBox } from '@client/components/ui';
+import { ErrorBox, LoadingSkeleton } from '@client/components/ui';
 import { currentMonthKey } from '@client/lib/dates';
 import { formatDateKey } from '@client/lib/labels';
 import { useApi } from '@client/lib/useApi';
@@ -97,21 +99,19 @@ export function ReportsPage({ workspace, dataVersion }: ReportsPageProps) {
         </div>
         {preset === 'custom' ? (
           <div className="grid grid-cols-2 gap-2 sm:max-w-md">
-            <input
-              type="date"
+            <DatePicker
               aria-label="Dari tanggal"
+              placeholder="Dari tanggal"
               value={custom.from}
               max={custom.to}
-              onChange={(e) => setCustom((c) => ({ ...c, from: e.target.value }))}
-              className={getInputClassName(false)}
+              onChange={(from) => setCustom((c) => ({ ...c, from }))}
             />
-            <input
-              type="date"
+            <DatePicker
               aria-label="Sampai tanggal"
+              placeholder="Sampai tanggal"
               value={custom.to}
               min={custom.from}
-              onChange={(e) => setCustom((c) => ({ ...c, to: e.target.value }))}
-              className={getInputClassName(false)}
+              onChange={(to) => setCustom((c) => ({ ...c, to }))}
             />
           </div>
         ) : null}
@@ -149,9 +149,7 @@ export function ReportsPage({ workspace, dataVersion }: ReportsPageProps) {
 
       {!data ? (
         validCustom ? (
-          <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-            <Loader2 className="h-4 w-4 animate-spin" /> Menyusun laporan...
-          </div>
+          <LoadingSkeleton label="Menyusun laporan..." variant="report" />
         ) : null
       ) : (
         <>
@@ -193,15 +191,20 @@ export function ReportsPage({ workspace, dataVersion }: ReportsPageProps) {
                 />
               </div>
             </div>
-            {trend.data ? (
-              showTable ? (
-                <TrendTable points={trend.data} currency={currency} />
+            <AutoHeight>
+              {trend.data ? (
+                // Kunci berbeda → isi lama diganti dan isi baru masuk dengan animasi (grafik: batang tumbuh).
+                <div key={showTable ? 'table' : 'chart'} className="animate-fade-up">
+                  {showTable ? (
+                    <TrendTable points={trend.data} currency={currency} />
+                  ) : (
+                    <TrendChart points={trend.data} currency={currency} />
+                  )}
+                </div>
               ) : (
-                <TrendChart points={trend.data} currency={currency} />
-              )
-            ) : (
-              <div className="h-56 animate-pulse rounded-xl bg-slate-50" />
-            )}
+                <div className="skeleton h-64 rounded-xl" />
+              )}
+            </AutoHeight>
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white shadow-xs break-inside-avoid">
@@ -247,7 +250,8 @@ function Segmented<T extends string | number>({
   options: Array<{ value: T; label: string; icon?: typeof Table2 }>;
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className="inline-flex gap-0.5 rounded-xl bg-slate-100 p-1">
+    <div role="radiogroup" aria-label={label} className="relative inline-flex gap-0.5 rounded-xl bg-slate-100 p-1">
+      <SegmentThumb className="bg-slate-900 shadow-xs" />
       {options.map((opt) => {
         const active = opt.value === value;
         const Icon = opt.icon;
@@ -258,8 +262,8 @@ function Segmented<T extends string | number>({
             role="radio"
             aria-checked={active}
             onClick={() => onChange(opt.value)}
-            className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition ${
-              active ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            className={`relative inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors duration-200 ${
+              active ? 'text-white' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             {Icon ? <Icon className="h-3.5 w-3.5" /> : null}

@@ -1,9 +1,11 @@
-import { ArrowRight, Check, Loader2, Plus, Split, Trash2 } from 'lucide-react';
+import { ArrowRight, Check, Plus, Split, Trash2 } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { FormField, Select, getInputClassName } from '@client/components/FormField';
+import { DatePicker } from '@client/components/DatePicker';
 import { Modal, ModalBody, ModalFooter, ModalHeader } from '@client/components/Modal';
+import { SegmentThumb } from '@client/components/SegmentThumb';
 import { MonthNav } from '@client/components/MonthNav';
-import { AmountInput, EmptyState, ErrorBox, PageToolbar, PrimaryButton, SecondaryButton } from '@client/components/ui';
+import { AmountInput, EmptyState, ErrorBox, PageToolbar, PrimaryButton, SecondaryButton, LoadingSkeleton } from '@client/components/ui';
 import { ApiRequestError, apiFetch } from '@client/lib/api';
 import { currentMonthKey, dateInputToIso, toDateInput } from '@client/lib/dates';
 import { ROLE_LABEL } from '@client/lib/labels';
@@ -241,9 +243,7 @@ export function SharedCashPage({ workspace, currentUserId, dataVersion, onChange
       <section className="space-y-2">
         <h2 className="px-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">Riwayat Split Bill</h2>
         {splits.loading && !splits.data ? (
-          <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-500">
-            <Loader2 className="h-4 w-4 animate-spin" /> Memuat...
-          </div>
+          <LoadingSkeleton label="Memuat..." />
         ) : (splits.data ?? []).length === 0 ? (
           <EmptyState>
             <Split className="mx-auto mb-2 h-8 w-8 text-slate-300" />
@@ -432,13 +432,7 @@ function SplitDialog({
               />
             </FormField>
             <FormField id="split-date" label="Tanggal" required>
-              <input
-                id="split-date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className={getInputClassName(false)}
-              />
+              <DatePicker id="split-date" value={date} onChange={setDate} />
             </FormField>
           </div>
 
@@ -464,7 +458,8 @@ function SplitDialog({
             </FormField>
           </div>
 
-          <div role="radiogroup" aria-label="Cara bagi" className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
+          <div role="radiogroup" aria-label="Cara bagi" className="relative grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
+                <SegmentThumb />
             {(['equal', 'custom'] as const).map((option) => (
               <button
                 key={option}
@@ -472,8 +467,8 @@ function SplitDialog({
                 role="radio"
                 aria-checked={mode === option}
                 onClick={() => setMode(option)}
-                className={`rounded-lg py-1.5 text-sm font-semibold transition ${
-                  mode === option ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500'
+                className={`relative rounded-lg py-1.5 text-sm font-semibold transition-colors duration-200 ${
+                  mode === option ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 {option === 'equal' ? 'Bagi rata' : 'Nominal custom'}

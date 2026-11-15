@@ -188,9 +188,23 @@ export function DashboardPage({
         </div>
         {data && data.recent.length > 0 ? (
           <TransactionList items={data.recent} onSelect={onOpenTransaction} />
+        ) : overview.loading ? (
+          <div className="space-y-4 px-4 py-4 sm:px-5" role="status">
+            <span className="sr-only">Memuat transaksi...</span>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="flex items-center gap-3" style={{ opacity: 1 - i * 0.2 }}>
+                <div className="skeleton h-9 w-9 shrink-0 rounded-xl" />
+                <div className="flex-1 space-y-2">
+                  <div className="skeleton h-3.5 w-2/5 rounded-full" />
+                  <div className="skeleton h-3 w-1/4 rounded-full" />
+                </div>
+                <div className="skeleton h-3.5 w-20 rounded-full" />
+              </div>
+            ))}
+          </div>
         ) : (
-          <p className="px-5 py-8 text-center text-sm text-slate-500">
-            {overview.loading ? 'Memuat...' : 'Belum ada transaksi. Catat yang pertama lewat Catat Cepat atau tombol +.'}
+          <p className="animate-fade-in px-5 py-8 text-center text-sm text-slate-500">
+            Belum ada transaksi. Catat yang pertama lewat Catat Cepat atau tombol +.
           </p>
         )}
       </section>
@@ -229,13 +243,16 @@ function StatCard({
           <Icon className="h-3.5 w-3.5" />
         </span>
       </div>
-      <p className="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 tabular-nums sm:text-xl">{value}</p>
+      {/* Nilai baru (data selesai dimuat / berubah) masuk halus, bukan berganti mendadak. */}
+      <p key={value} className="mt-1 animate-fade-up truncate text-lg font-bold tracking-tight text-slate-900 tabular-nums sm:text-xl">
+        {value}
+      </p>
       <p className="mt-0.5 truncate text-xs text-slate-500">{note}</p>
     </>
   );
   const className = `min-w-0 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-xs ${extraClass}`;
   return onClick ? (
-    <button type="button" onClick={onClick} className={`${className} transition hover:border-slate-300`}>
+    <button type="button" onClick={onClick} className={`${className} hover:border-slate-300`}>
       {content}
     </button>
   ) : (
